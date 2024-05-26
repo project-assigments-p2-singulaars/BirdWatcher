@@ -1,13 +1,11 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: .NET Auto-Grading
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      solution_file:
+        description: 'test solution(.sln)'
+        required: true
 
 jobs:
   build:
@@ -15,14 +13,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Check out repository
+      uses: actions/checkout@v2
+      
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 6.0.x
+      
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ${{ github.workspace }}/${{ github.event.inputs.solution_file }}
+
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build ${{ github.workspace }}/${{ github.event.inputs.solution_file }} --no-restore
+      
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test ${{ github.workspace }}/${{ github.event.inputs.solution_file }} --no-build --verbosity normal
