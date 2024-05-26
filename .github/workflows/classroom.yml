@@ -1,11 +1,9 @@
 name: .NET Auto-Grading
 
 on:
-  workflow_dispatch:
-    inputs:
-      solution_file:
-        description: 'test solution(.sln)'
-        required: true
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -21,11 +19,18 @@ jobs:
       with:
         dotnet-version: 6.0.x
       
+    - name: Find Solution File
+      id: find-solution
+      run: |
+        find . -name "*.sln" -type f -exec echo "::set-output name=solution::{}" \;
+      shell: bash
+      
     - name: Restore dependencies
-      run: dotnet restore ${{ github.workspace }}/${{ github.event.inputs.solution_file }}
+      run: dotnet restore ${{ steps.find-solution.outputs.solution }}
 
     - name: Build
-      run: dotnet build ${{ github.workspace }}/${{ github.event.inputs.solution_file }} --no-restore
+      run: dotnet build ${{ steps.find-solution.outputs.solution }} --no-restore
       
     - name: Test
-      run: dotnet test ${{ github.workspace }}/${{ github.event.inputs.solution_file }} --no-build --verbosity normal
+      run: dotnet test ${{ steps.find-solution.outputs.solution }} --no-build --verbosity normal
+
