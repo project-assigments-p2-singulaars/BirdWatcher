@@ -4,12 +4,15 @@ on:
   push:
     branches:
       - main
-      - master # Agrega la rama principal de tu repositorio
 
 jobs:
   build:
 
-    runs-on: windows-latest # Cambia a windows-latest para usar la terminal de comandos de Windows
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
     - name: Check out repository
@@ -18,7 +21,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 6.0.x
       
     - name: Find Solution File
       id: find-solution
@@ -32,6 +35,8 @@ jobs:
     - name: Build
       run: dotnet build ${{ steps.find-solution.outputs.solution }} --no-restore
       
+    - name: Change to Solution Directory
+      run: cd $(dirname "${{ steps.find-solution.outputs.solution }}")
+      
     - name: Test
-      run: dotnet test BirdWatcherTests.cs --no-build --verbosity normal
-
+      run: dotnet test $(basename "${{ steps.find-solution.outputs.solution }}") --no-build --verbosity normal
