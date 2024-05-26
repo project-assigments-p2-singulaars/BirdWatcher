@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - master # Agrega la rama principal de tu repositorio
 
 jobs:
   build:
@@ -32,5 +33,5 @@ jobs:
       run: dotnet build ${{ steps.find-solution.outputs.solution }} --no-restore
       
     - name: Test
-      run: dotnet test ${{ steps.find-solution.outputs.solution }} --no-build --verbosity normal
+      run: dotnet test BirdWatcherTests.cs --no-build --verbosity normal
 
